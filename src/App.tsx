@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import QuestionDisplay from './components/QuestionDisplay'
 import Timer from './components/Timer'
+import { mcpService } from './services/mcpService'
 
 export interface Question {
   id: number;
@@ -14,22 +15,48 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
   const [currentQuestionSet, setCurrentQuestionSet] = useState(1)
 
-  // Mock function to simulate MCP server call
+  // Generate questions using MCP service
   const generateQuestions = async (): Promise<Question[]> => {
     setIsLoading(true)
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    try {
+      // Initialize MCP service if not already connected
+      await mcpService.connect()
+      
+      // Generate questions using MCP
+      const newQuestions = await mcpService.generateQuestions(10)
+      
+      setIsLoading(false)
+      return newQuestions
+    } catch (error) {
+      console.error('Failed to generate questions via MCP:', error)
+      setIsLoading(false)
+      
+      // Fallback to local questions if MCP fails
+      return getFallbackQuestions()
+    }
+  }
+
+  // Fallback questions in case MCP service fails
+  const getFallbackQuestions = (): Question[] => {
+    const questionTemplates = [
+      "Name 3 favorite foods",
+      "Name 3 places you want to travel", 
+      "Name 3 songs you both love",
+      "Name 3 funny habits",
+      "Name 3 movies to rewatch",
+      "Name 3 dream jobs",
+      "Name 3 romantic date ideas",
+      "Name 3 weekend activities",
+      "Name 3 favorite desserts",
+      "Name 3 things you admire about each other"
+    ]
     
-    // Mock questions - replace this with actual MCP server call
-    const mockQuestions: Question[] = Array.from({ length: 10 }, (_, index) => ({
-      id: (currentQuestionSet - 1) * 10 + index + 1,
-      text: `Question ${(currentQuestionSet - 1) * 10 + index + 1}: What is the significance of ${['React hooks', 'TypeScript generics', 'async/await', 'closures in JavaScript', 'REST APIs', 'GraphQL', 'microservices', 'Docker containers', 'JWT tokens', 'database indexing'][index]}?`,
-      category: ['Frontend', 'Programming', 'Backend', 'DevOps', 'Security'][Math.floor(Math.random() * 5)]
+    return questionTemplates.map((text, index) => ({
+      id: index + 1,
+      text,
+      category: ['Personal', 'Relationship', 'Dreams', 'Fun', 'Life'][Math.floor(Math.random() * 5)]
     }))
-    
-    setIsLoading(false)
-    return mockQuestions
   }
 
   const handleGenerateQuestions = async () => {
