@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import QuestionDisplay from './components/QuestionDisplay'
 import Timer from './components/Timer'
+import DebugPanel from './components/DebugPanel'
 import { mcpService } from './services/mcpService'
 
 export interface Question {
@@ -17,22 +18,27 @@ function App() {
 
   // Generate questions using MCP service
   const generateQuestions = async (): Promise<Question[]> => {
+    console.log('🎯 App: Starting question generation...');
     setIsLoading(true)
     
     try {
       // Initialize MCP service if not already connected
+      console.log('🔌 App: Connecting to MCP service...');
       await mcpService.connect()
       
       // Generate questions using MCP
+      console.log('📝 App: Requesting questions from MCP service...');
       const newQuestions = await mcpService.generateQuestions(10)
       
+      console.log('✅ App: Received', newQuestions.length, 'questions:', newQuestions.map(q => q.text));
       setIsLoading(false)
       return newQuestions
     } catch (error) {
-      console.error('Failed to generate questions via MCP:', error)
+      console.error('❌ App: Failed to generate questions via MCP:', error)
       setIsLoading(false)
       
       // Fallback to local questions if MCP fails
+      console.log('🔄 App: Using local fallback questions');
       return getFallbackQuestions()
     }
   }
@@ -104,6 +110,8 @@ function App() {
           <Timer />
         </div>
       </main>
+      
+      <DebugPanel />
     </div>
   )
 }

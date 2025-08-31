@@ -28,14 +28,17 @@ class MCPService {
       throw new Error('MCP Service not connected');
     }
 
+    console.log('🔗 MCP Service: Generating', count, 'questions...');
+
     try {
-      // For now, we'll use a direct API call
-      // Replace this with actual MCP server call when available
-      const response = await this.callLLMDirectly(count);
-      return response;
+      // Generate questions using LLM service
+      const newQuestions = await this.callLLMDirectly(count);
+      console.log('✅ MCP Service: Successfully generated', newQuestions.length, 'questions');
+      return newQuestions;
     } catch (error) {
-      console.error('Failed to generate questions:', error);
+      console.error('❌ MCP Service: Failed to generate questions:', error);
       // Fallback to mock data if LLM fails
+      console.log('🔄 MCP Service: Using fallback questions');
       return this.getFallbackQuestions(count);
     }
   }

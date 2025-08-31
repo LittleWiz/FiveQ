@@ -1,5 +1,6 @@
 // LLM Integration Service for generating questions
 import { MCPQuestion } from './mcpService';
+import { createPrompt } from '../config/questionConfig';
 
 interface LLMConfig {
   apiKey?: string;
@@ -22,30 +23,31 @@ class LLMService {
     // Check if we have an API key from environment
     const apiKey = (import.meta as any).env?.VITE_ANTHROPIC_API_KEY || this.config.apiKey;
     
+    console.log('🔍 LLM Service Debug:');
+    console.log('- API Key exists:', !!apiKey);
+    console.log('- API Key starts with sk-ant:', apiKey?.startsWith('sk-ant-'));
+    console.log('- Questions requested:', count);
+    
     if (!apiKey || apiKey === 'your_anthropic_api_key_here') {
-      console.log('No API key found, using enhanced mock questions');
+      console.log('❌ No valid API key found, using enhanced mock questions');
       return this.generateEnhancedMockQuestions(count);
     }
 
     try {
+      console.log('🚀 Attempting to call Anthropic API...');
       return await this.callAnthropicAPI(apiKey, count);
     } catch (error) {
-      console.error('LLM API call failed:', error);
+      console.error('❌ LLM API call failed:', error);
+      console.log('🔄 Falling back to enhanced mock questions');
       return this.generateEnhancedMockQuestions(count);
     }
   }
 
   private async callAnthropicAPI(apiKey: string, count: number): Promise<MCPQuestion[]> {
-    const prompt = `Generate ${count} engaging "Name 3" questions for couples or friends to get to know each other better. 
-
-Format: Just return the questions, one per line, starting with "Name 3"
-
-Examples:
-- Name 3 favorite foods
-- Name 3 places you want to travel
-- Name 3 songs you both love
-
-Make them personal, fun, and conversation-starting. Avoid overly intimate or controversial topics.`;
+    console.log('📡 Making API call to Anthropic...');
+    
+    // Use the configurable prompt
+    const prompt = createPrompt(count);
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -66,14 +68,24 @@ Make them personal, fun, and conversation-starting. Avoid overly intimate or con
       })
     });
 
+    console.log('📊 API Response Status:', response.status);
+
     if (!response.ok) {
-      throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('❌ API Error Response:', errorText);
+      throw new Error(`API call failed: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();
-    const questionText = data.content[0].text;
+    console.log('✅ API Response received, parsing questions...');
     
-    return this.parseQuestionsFromText(questionText);
+    const questionText = data.content[0].text;
+    console.log('📝 Raw API Response:', questionText);
+    
+    const parsedQuestions = this.parseQuestionsFromText(questionText);
+    console.log('🎯 Parsed Questions:', parsedQuestions.length, 'questions generated');
+    
+    return parsedQuestions;
   }
 
   private parseQuestionsFromText(text: string): MCPQuestion[] {
