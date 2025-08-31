@@ -13,7 +13,7 @@ class LLMService {
 
   constructor(config: LLMConfig = {}) {
     this.config = {
-      model: 'claude-3-sonnet-20240229',
+      model: 'claude-3-haiku-20240307',
       maxTokens: 1000,
       ...config
     };
@@ -44,11 +44,52 @@ class LLMService {
   }
 
   private async callAnthropicAPI(apiKey: string, count: number): Promise<MCPQuestion[]> {
-    console.log('📡 Making API call to Anthropic...');
-    
     // Use the configurable prompt
     const prompt = createPrompt(count);
+    const backendUrl = 'http://localhost:3001/api/anthropic';
 
+    // Try backend server first
+    try {
+      console.log('� Trying backend server at localhost:3001...');
+      
+      const response = await fetch(backendUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: this.config.model,
+          max_tokens: this.config.maxTokens,
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ]
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Got response from backend server');
+        
+        const questionText = data.content[0].text;
+        console.log('📝 Raw API Response from backend:', questionText);
+        
+        const parsedQuestions = this.parseQuestionsFromText(questionText);
+        console.log('🎯 Parsed Questions from backend:', parsedQuestions.length, 'questions generated');
+        
+        return parsedQuestions;
+      } else {
+        console.log('⚠️ Backend server returned error, trying direct API...');
+      }
+    } catch (error) {
+      console.log('⚠️ Backend server not available, trying direct API...');
+    }
+
+    // Fallback to direct API (will likely fail due to CORS in browser)
+    console.log('📡 Making direct API call to Anthropic...');
+    
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
