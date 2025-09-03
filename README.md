@@ -2,6 +2,21 @@
 
 🎯 A modern React TypeScript application that generates batches of 10 questions using Claude API with an integrated 5-second timer. Built with responsive design for seamless use across desktop and mobile devices.
 
+![FiveQ App Preview](screenshots/app-preview.png)
+
+*Generate AI-powered questions with precision timing controls*
+
+## Screenshots
+
+### Desktop View
+![Desktop App](screenshots/app-preview.png)
+
+### Mobile View  
+![Mobile App](screenshots/mobile-view.png)
+
+### Timer in Action
+![Timer Demo](screenshots/timer-demo.gif)
+
 ## Features
 
 - **AI Question Generation**: Generate 10 contextual questions using Anthropic's Claude API
