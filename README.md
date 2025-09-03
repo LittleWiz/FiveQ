@@ -1,14 +1,15 @@
-# FiveQ - Question Generator
+# FiveQ - AI-Powered Question Generator
 
-A modern React TypeScript application for generating and displaying questions with timer functionality, designed to integrate with LLM MCP (Model Context Protocol) servers.
+🎯 A modern React TypeScript application that generates batches of 10 questions using Claude API with an integrated 5-second timer. Built with responsive design for seamless use across desktop and mobile devices.
 
 ## Features
 
-- **Question Generation**: Display 10 questions at once from an LLM MCP server
-- **Dynamic Loading**: Generate new sets of questions with a single button click
-- **Timer Functionality**: 5-second countdown timer with start, stop, and reset controls
-- **Responsive Design**: Modern UI that works on desktop and mobile devices
-- **TypeScript Support**: Full type safety and developer experience
+- **AI Question Generation**: Generate 10 contextual questions using Anthropic's Claude API
+- **Batch Processing**: Get new sets of questions with a single button click
+- **5-Second Timer**: Precision countdown timer with start, stop, and reset controls
+- **Responsive Design**: Modern UI that works perfectly on all devices
+- **Real-time API Integration**: Direct integration with Claude API through Express.js backend
+- **TypeScript Support**: Full type safety and excellent developer experience
 
 ## Project Structure
 
@@ -17,13 +18,22 @@ FiveQ/
 ├── src/
 │   ├── components/
 │   │   ├── QuestionDisplay.tsx  # Component for displaying questions
-│   │   └── Timer.tsx           # Timer component with controls
+│   │   ├── Timer.tsx           # Timer component with controls
+│   │   └── DebugPanel.tsx      # Debug panel for development
+│   ├── services/
+│   │   ├── llmService.ts       # Claude API integration
+│   │   └── mcpService.ts       # MCP service layer
+│   ├── config/
+│   │   └── questionConfig.ts   # Question generation configuration
 │   ├── App.tsx                 # Main application component
 │   ├── App.css                 # Application styles
 │   ├── index.css               # Global styles
 │   └── main.tsx               # Application entry point
 ├── public/                     # Static assets
+├── server.js                   # Express.js backend server
+├── .env.local                  # Environment variables (API keys)
 ├── package.json               # Dependencies and scripts
+├── server-package.json        # Backend dependencies
 ├── tsconfig.json              # TypeScript configuration
 ├── vite.config.ts             # Vite build configuration
 └── README.md                  # This file
@@ -33,118 +43,224 @@ FiveQ/
 
 ### Prerequisites
 
-- Node.js (version 16 or higher)
-- npm or yarn package manager
+- **Node.js** (version 16 or higher)
+- **npm** package manager
+- **Anthropic API Key** (get one from [Anthropic Console](https://console.anthropic.com/))
 
-### Installation
+### Installation & Setup
 
-1. **Install dependencies**:
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/LittleWiz/FiveQ.git
+   cd FiveQ
+   ```
+
+2. **Install dependencies**:
    ```bash
    npm install
    ```
 
-2. **Start the development server**:
+3. **Set up environment variables**:
+   - Copy `.env.local` file (should already exist)
+   - Replace the API key with your actual Anthropic API key:
    ```bash
-   npm run dev
+   VITE_ANTHROPIC_API_KEY="your-actual-api-key-here"
    ```
 
-3. **Open your browser** and navigate to `http://localhost:5173`
+### Running the Application
+
+**You need to run BOTH servers for the app to work:**
+
+#### Step 1: Start the Backend Server
+```bash
+node server.js
+```
+You should see: `🚀 Server running on http://localhost:3001`
+
+#### Step 2: Start the Frontend Development Server
+In a new terminal:
+```bash
+npm run dev
+```
+You should see: `VITE v5.x.x ready in xxx ms` with local URL
+
+#### Step 3: Open the Application
+Navigate to: `http://localhost:5173/`
+
+### Quick Health Check
+
+Test if everything is working:
+```bash
+# Test backend
+curl http://localhost:3001/api/test
+
+# Should return: {"status":"Server is working","timestamp":"..."}
+```
 
 ### Available Scripts
 
-- `npm run dev` - Start development server
+#### Frontend Scripts
+- `npm run dev` - Start frontend development server (port 5173)
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 
-## Usage
+#### Backend Scripts
+- `node server.js` - Start backend server (port 3001)
 
-### Question Generator
+### Network Access (Mobile Testing)
 
-1. **Initial Load**: The application automatically generates the first set of 10 questions when it loads
-2. **Generate New Questions**: Click the "Generate Next 10 Questions" button to fetch a new set
-3. **Question Display**: Each question is displayed in a card with a number and category
+To access the app from other devices on your network:
 
-### Timer
-
-1. **Start Timer**: Click the "Start" button to begin the 5-second countdown
-2. **Stop Timer**: Click "Stop" to pause the timer
-3. **Reset Timer**: Click "Reset" to reset the timer back to 5 seconds
-4. **Visual Feedback**: The timer turns red and pulses when 2 seconds or less remain
-
-## MCP Integration
-
-Currently, the application uses mock data for demonstration purposes. To integrate with an actual LLM MCP server:
-
-1. **Install MCP Client**: Add the appropriate MCP client library
+1. **Start frontend with network access**:
    ```bash
-   npm install @modelcontextprotocol/client
+   npm run dev -- --host
    ```
 
-2. **Replace Mock Function**: Update the `generateQuestions` function in `App.tsx` to call your MCP server
+2. **Find your network IP** and use:
+   ```
+   http://YOUR-IP-ADDRESS:5173/
+   ```
 
-3. **Configure Server**: Set up your MCP server configuration and connection details
+## Usage
 
-### Example MCP Integration
+### Question Generation
 
-```typescript
-const generateQuestions = async (): Promise<Question[]> => {
-  try {
-    // Replace with actual MCP server call
-    const response = await mcpClient.call('generate_questions', {
-      count: 10,
-      difficulty: 'medium',
-      category: 'general'
-    });
-    
-    return response.questions;
-  } catch (error) {
-    console.error('Failed to generate questions:', error);
-    throw error;
-  }
-};
+1. **Generate Questions**: Click "Generate Questions" button
+2. **View Results**: 10 AI-generated questions will appear in a grid layout
+3. **Get More**: Click "Generate Next 10" for additional questions
+4. **Loading States**: Visual feedback during API calls
+
+### Timer Functionality
+
+1. **Start Timer**: Click "Start Timer" to begin 5-second countdown
+2. **Stop Timer**: Click "Stop Timer" to pause
+3. **Reset Timer**: Click "Reset Timer" to return to 5 seconds
+4. **Visual Feedback**: Timer turns red and pulses when ≤2 seconds remain
+
+## API Integration
+
+### Current Implementation
+
+The app uses **Anthropic's Claude API** for question generation:
+
+- **Model**: `claude-3-haiku-20240307`
+- **Backend**: Express.js server on port 3001
+- **CORS**: Configured for cross-origin requests
+- **Error Handling**: Comprehensive error handling and fallbacks
+
+### API Flow
+
+1. Frontend sends request to local backend (`http://localhost:3001/api/anthropic`)
+2. Backend forwards request to Claude API with your API key
+3. Backend returns processed questions to frontend
+4. Frontend displays questions in responsive grid
+
+### Environment Configuration
+
+```bash
+# .env.local
+VITE_ANTHROPIC_API_KEY="your-api-key-here"
+VITE_BACKEND_URL=http://localhost:3001/api/anthropic
+VITE_QUESTIONS_PER_SET=10
+VITE_QUESTION_CATEGORIES=Personal,Relationship,Dreams,Fun,Life
 ```
 
-## Customization
+## Troubleshooting
 
-### Styling
+### Common Issues
 
-- Modify `src/App.css` for component-specific styles
-- Update `src/index.css` for global styles
-- Colors and spacing can be adjusted via CSS custom properties
-
-### Timer Duration
-
-Change the timer duration by modifying the initial value in `Timer.tsx`:
-
-```typescript
-const [timeLeft, setTimeLeft] = useState(5) // Change 5 to desired seconds
+**Backend not responding:**
+```bash
+# Check if backend is running
+curl http://localhost:3001/api/test
 ```
 
-### Question Count
+**Frontend build errors:**
+```bash
+# Clear cache and reinstall
+rm -rf node_modules package-lock.json
+npm install
+```
 
-Modify the question generation logic in `App.tsx` to change the number of questions per set.
+**API errors:**
+- Verify your Anthropic API key in `.env.local`
+- Check backend terminal for error messages
+- Ensure both servers are running
+
+**Port conflicts:**
+- Backend: 3001 (change in `server.js`)
+- Frontend: 5173 (Vite auto-selects if busy)
+
+### Network Access Issues
+
+If mobile access doesn't work:
+1. Ensure both devices are on same network
+2. Check Windows Firewall settings
+3. Use network IP instead of localhost
 
 ## Technologies Used
 
-- **React 18** - Modern React with hooks
-- **TypeScript** - Type safety and developer experience
-- **Vite** - Fast build tool and development server
-- **CSS Grid & Flexbox** - Responsive layout system
-- **ESLint** - Code quality and consistency
+- **Frontend**: React 18, TypeScript, Vite
+- **Backend**: Express.js, Node.js
+- **AI Integration**: Anthropic Claude API (claude-3-haiku-20240307)
+- **Styling**: CSS Grid, Flexbox, responsive design
+- **Development**: ESLint, TypeScript, Hot reload
+- **Architecture**: MCP (Model Context Protocol) ready
+
+## Customization
+
+### Timer Duration
+
+Change timer duration in `src/components/Timer.tsx`:
+```typescript
+const [timeLeft, setTimeLeft] = useState(5) // Change to desired seconds
+```
+
+### Question Categories
+
+Modify categories in `.env.local`:
+```bash
+VITE_QUESTION_CATEGORIES=Personal,Work,Travel,Hobbies,Goals
+```
+
+### Questions Per Set
+
+Change question count in `.env.local`:
+```bash
+VITE_QUESTIONS_PER_SET=15  # Default is 10
+```
+
+### Styling
+
+- **Component styles**: `src/App.css`
+- **Global styles**: `src/index.css`
+- **Responsive breakpoints**: CSS custom properties
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- **Anthropic** for Claude API
+- **Vite** for excellent development experience
+- **React** community for amazing ecosystem
 
 ## Support
 
-For questions or issues, please open an issue on the project repository.
+- 📧 **Issues**: [GitHub Issues](https://github.com/LittleWiz/FiveQ/issues)
+- 📖 **Documentation**: This README
+- 🔧 **Troubleshooting**: See troubleshooting section above
+
+---
+
+**Made with ❤️ using React, TypeScript, and Claude AI**
