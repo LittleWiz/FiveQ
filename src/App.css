@@ -18,7 +18,7 @@ html, body {
 .app {
   max-width: 100%;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 0.5rem; /* Reduced from 1rem */
   text-align: left;
   min-height: 100vh;
   display: flex;
@@ -27,19 +27,19 @@ html, body {
 
 .app-header {
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem; /* Reduced from 1rem */
   flex-shrink: 0;
 }
 
 .app-header h1 {
   color: #646cff;
-  margin-bottom: 0.5rem;
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  margin-bottom: 0.25rem; /* Reduced from 0.5rem */
+  font-size: clamp(1rem, 2vw, 1.25rem); /* Reduced by ~50% */
 }
 
 .app-header p {
   color: #888;
-  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-size: clamp(0.7rem, 1.5vw, 0.85rem); /* Reduced by ~50% */
 }
 
 .app-main {
@@ -48,7 +48,7 @@ html, body {
   gap: 1rem;
   flex: 1;
   min-height: 0; /* Important for grid items to shrink */
-  height: calc(100vh - 120px); /* Subtract header height */
+  height: calc(100vh - 60px); /* Reduced from 120px to account for smaller header */
 }
 
 .left-panel {
@@ -72,7 +72,7 @@ html, body {
 .question-section {
   background: #f8f9fa;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1rem; /* Reduced padding */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   height: 100%;
   display: flex;
@@ -83,8 +83,8 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
+  margin-bottom: 0.75rem; /* Reduced margin */
+  padding-bottom: 0.75rem; /* Reduced padding */
   border-bottom: 2px solid #e9ecef;
   flex-shrink: 0; /* Don't shrink the controls */
 }
@@ -121,11 +121,12 @@ html, body {
 
 .questions-grid {
   display: grid;
-  gap: 1rem;
+  gap: 0.4rem; /* Further reduced gap between cards */
   flex: 1; /* Take up remaining space */
   overflow-y: auto; /* Enable scrolling for questions only */
   padding-right: 0.5rem; /* Space for scrollbar */
   max-height: 100%; /* Ensure it doesn't exceed container */
+  grid-template-columns: 1fr; /* Single column for compact layout */
 }
 
 /* Custom scrollbar for questions grid */
@@ -150,9 +151,14 @@ html, body {
 .question-card {
   background: white;
   border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: clamp(0.75rem, 2vw, 1rem);
+  border-radius: 6px; /* Slightly smaller border radius */
+  padding: 0.5rem; /* Further reduced padding */
   transition: all 0.3s ease;
+  min-height: 65px; /* Reduced minimum height */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative; /* For absolute positioning of category */
 }
 
 .question-card:hover {
@@ -164,24 +170,30 @@ html, body {
 .question-number {
   color: #646cff;
   font-weight: 600;
-  font-size: clamp(0.8rem, 2vw, 0.9rem);
-  margin-bottom: 0.5rem;
+  font-size: 0.85rem; /* Fixed smaller size */
+  margin-bottom: 0.25rem; /* Reduced margin */
 }
 
 .question-text {
   color: #333;
-  line-height: 1.6;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  line-height: 1.3; /* Even tighter line height */
+  font-size: 0.9rem; /* Slightly smaller font */
+  margin-bottom: 0; /* Remove bottom margin */
+  flex: 1; /* Take up available space */
+  padding-right: 65px; /* Slightly reduced space for category tag */
 }
 
 .question-category {
-  display: inline-block;
+  position: absolute; /* Position absolutely within the card */
+  top: 0.5rem; /* Distance from top */
+  right: 0.5rem; /* Distance from right */
   background: #e9ecef;
   color: #666;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
-  margin-top: 0.75rem;
+  padding: 0.2rem 0.5rem; /* Smaller padding */
+  border-radius: 10px; /* Smaller border radius */
+  font-size: 0.7rem; /* Smaller font */
+  font-weight: 500;
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
 .loading-spinner {
@@ -330,25 +342,25 @@ html, body {
 @media (max-width: 1024px) {
   .app-main {
     grid-template-columns: 55% 45%;
-    height: calc(100vh - 100px);
+    height: calc(100vh - 50px); /* Adjusted for smaller header */
     gap: 0.75rem;
   }
   
   .app {
-    padding: 0.75rem;
+    padding: 0.5rem; /* Reduced padding */
   }
 }
 
 /* Mobile landscape and smaller tablets */
 @media (max-width: 768px) {
   .app {
-    padding: 0.5rem;
+    padding: 0.25rem; /* Further reduced padding */
   }
   
   .app-main {
     grid-template-columns: 1fr;
     grid-template-rows: 60% 40%;
-    height: calc(100vh - 80px);
+    height: calc(100vh - 40px); /* Adjusted for smaller header */
     gap: 0.5rem;
   }
   
